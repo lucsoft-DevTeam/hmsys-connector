@@ -1,6 +1,8 @@
 import { EventAction } from './events/EventAction';
 import { EventTypes } from './events/EventTypes';
 import { CustomProvider } from './store/CustomProvider';
+export * as store from './store';
+export * as events from './events';
 
 export class NetworkConnector
 {
