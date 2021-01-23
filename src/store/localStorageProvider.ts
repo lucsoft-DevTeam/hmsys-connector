@@ -1,19 +1,16 @@
-import { LoginData } from './AuthStore';
+import { LoginData, ReloginData } from './AuthStore';
 import { CustomProvider } from './CustomProvider';
 
-export class LocalStorageProvider implements CustomProvider
+export function createLocalStorageProvider(data: () => Promise<LoginData>): CustomProvider
 {
-    data: Promise<LoginData>
-    constructor(data: Promise<LoginData>)
-    {
-        this.data = data;
+    return {
+        getReloginDetails: () =>
+        {
+            return localStorage[ "nc-ls-auth" ] ? JSON.parse(localStorage[ "nc-ls-auth" ]) : undefined
+        },
+
+        setReloginDetails: (data: ReloginData) => localStorage[ "nc-ls-auth" ] = JSON.stringify(data),
+        resetReloginDetails: () => localStorage.removeItem("nc-ls-auth"),
+        requestNewLoginDetials: () => data()
     }
-
-    doesLoginExists(): boolean
-    {
-        return false
-    }
-
-    newLoginDetials = () => this.data
-
 }

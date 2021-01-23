@@ -1,7 +1,9 @@
-import { LoginData } from './AuthStore';
+import { LoginData, ReloginData } from './AuthStore';
 
-export interface CustomProvider
-{
-    doesLoginExists: () => boolean
-    newLoginDetials: () => Promise<LoginData>
-}
+export type CustomProvider =
+    {
+        getReloginDetails: () => ReloginData | undefined
+        resetReloginDetails: () => void
+        setReloginDetails: (data: ReloginData) => void
+        requestNewLoginDetials: () => Promise<LoginData>
+    }
