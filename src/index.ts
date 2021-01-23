@@ -1,70 +1,85 @@
 import { EventAction } from './events/EventAction';
 import { EventTypes } from './events/EventTypes';
 import { CustomProvider } from './store/CustomProvider';
-export * as store from './store';
-export * as events from './events';
+export { createLocalStorageProvider } from './store/LocalStorageProvider';
+export { CustomProvider } from './store/CustomProvider';
+export { LoginData, ReloginData } from './store/AuthStore';
+export { EventAction } from './events/EventAction';
+export { EventTypes } from './events/EventTypes';
 
 export class NetworkConnector
 {
     url: string
     events: EventAction[] = []
+    socket: WebSocket | undefined = undefined;
+    auth: CustomProvider | undefined = undefined;
     constructor(url: string) { this.url = url }
 
-    addEvent = (action: EventAction) => this.events.push(action)
-    private emitEvent(type: EventTypes, data: any)
+    event = (action: EventAction) => { this.events.push(action); return this }
+    ajson = (data: any) => this.socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
+    json = (data: any) => this.socket?.send(JSON.stringify(data))
+    raw = (data: any) => this.socket?.send(data)
+
+    connect(auth: CustomProvider)
     {
-        this.events.filter(x => x.eventType == type).forEach(x => x.eventAction(data))
-    }
-    registerToNetwork(auth: CustomProvider)
-    {
-        const socket = new WebSocket(this.url);
-        this.emitEvent(EventTypes.Connecting, { socket })
-        socket.onmessage = (x) =>
+        this.socket = new WebSocket(this.url);
+        this.auth = auth;
+        this.emitEvent(EventTypes.Connecting, { socket: this.socket })
+        this.socket.onmessage = (x) =>
         {
             try
             {
                 const data = JSON.parse(x.data)
-                this.emitEvent(EventTypes.RawMessage, { data, socket })
+                this.emitEvent(EventTypes.RawMessage, { data, socket: this.socket })
                 if (data.login == "require authentication")
                 {
-                    this.emitEvent(EventTypes.TryingLogin, { socket })
+                    this.emitEvent(EventTypes.TryingLogin, { socket: this.socket })
                     const relogin = auth.getReloginDetails();
                     if (relogin)
-                        socket.send(JSON.stringify({
+                        this.json({
                             action: "login",
                             type: "client",
                             token: relogin.token,
                             id: relogin.id
-                        }))
+                        })
                     else
                         auth.requestNewLoginDetials().then(({ email, password }) =>
-                            socket.send(JSON.stringify({
+                            this.json({
                                 action: "login",
                                 type: "client",
                                 email,
                                 password
-                            })))
+                            }))
 
                 } else if (data.login == false)
                 {
-                    this.emitEvent(EventTypes.LoginFailed, { socket })
+                    this.emitEvent(EventTypes.LoginFailed, { socket: this.socket })
                     auth.resetReloginDetails()
-                    this.registerToNetwork(auth)
+                    this.connect(auth)
                 } else if (data.login == true)
                 {
-                    this.emitEvent(EventTypes.LoginSuccessful, { socket, data })
+                    this.emitEvent(EventTypes.LoginSuccessful, { socket: this.socket, data })
                     auth.setReloginDetails(data.client)
                 } else
                 {
-                    this.emitEvent(EventTypes.Message, { socket, data })
+                    this.emitEvent(EventTypes.Message, { socket: this.socket, data })
                 }
             } catch (error)
             {
                 console.error(error);
             }
         };
-        socket.onopen = () => this.emitEvent(EventTypes.Conncted, { socket })
-        socket.onclose = () => this.emitEvent(EventTypes.Disconnected, { socket })
-        socket.onerror = () => this.emitEvent(EventTypes.Disconnected, { socket })
+        this.socket.onopen = () => this.emitEvent(EventTypes.Conncted, { socket: this.socket })
+        this.socket.onclose = () => this.emitEvent(EventTypes.Disconnected, { socket: this.socket })
+        this.socket.onerror = () => this.emitEvent(EventTypes.Disconnected, { socket: this.socket })
+        return this;
+    }
+
+    getAuth = () => this.auth?.getReloginDetails();
+
+    private emitEvent(type: EventTypes, data: any)
+    {
+        this.events.filter(x => x.type == type).forEach(x => x.action(data))
+        return this;
     }
 }

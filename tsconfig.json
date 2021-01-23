@@ -6,6 +6,7 @@
         "strict": true,
         "declaration": true,
         "outDir": "bin",
+        "moduleResolution": "node",
         "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
     }
 }
