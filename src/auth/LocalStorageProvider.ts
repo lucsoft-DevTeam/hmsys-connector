@@ -1,7 +1,7 @@
-import { LoginData, ReloginData } from './AuthStore';
-import { CustomProvider } from './CustomProvider';
+import type { LoginData, ReloginData, ResponseTypeOfLoginRequest } from './AuthStore';
+import type { CustomProvider } from './CustomProvider';
 
-export function createLocalStorageProvider(data: () => Promise<LoginData>): CustomProvider
+export function createLocalStorageProvider(data: (type: ResponseTypeOfLoginRequest) => Promise<LoginData>): CustomProvider
 {
     return {
         getReloginDetails: () =>
@@ -11,6 +11,6 @@ export function createLocalStorageProvider(data: () => Promise<LoginData>): Cust
 
         setReloginDetails: (data: ReloginData) => localStorage[ "nc-ls-auth" ] = JSON.stringify(data),
         resetReloginDetails: () => localStorage.removeItem("nc-ls-auth"),
-        requestNewLoginDetials: () => data()
+        requestNewLoginDetials: (type) => data(type)
     }
 }
