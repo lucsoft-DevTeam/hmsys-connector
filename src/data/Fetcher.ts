@@ -11,11 +11,7 @@ export class Fetcher
         this.hmsys = hmsys;
         this.hmsys().event({
             type: EventTypes.Message,
-            action: ({ data }) =>
-            {
-                console.log(Object.keys(this.eventsHolder))
-                Object.keys(this.eventsHolder).forEach(x => this.eventsHolder[ x ](data))
-            }
+            action: ({ data }) => Object.keys(this.eventsHolder).forEach(x => this.eventsHolder[ x ](data))
         })
     }
 
