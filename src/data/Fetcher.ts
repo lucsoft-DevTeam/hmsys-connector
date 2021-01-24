@@ -40,4 +40,23 @@ export class Fetcher
             }
         })
     }
+
+    trigger(id: string, data: any)
+    {
+        this.hmsys().ajson({
+            id,
+            action: "trigger",
+            type: id,
+            data
+        })
+    }
+
+    triggerResponse(id: string, data: any)
+    {
+        return this.customRequest({
+            action: "trigger",
+            type: id,
+            data
+        })
+    }
 }
