@@ -2,20 +2,30 @@ import { EventAction } from './events/EventAction';
 import { EventTypes } from './events/EventTypes';
 import { CustomProvider } from './auth/CustomProvider';
 import { Fetcher } from './data/Fetcher';
+import { RestFetcher } from './data/RestFetcher';
 export { createLocalStorageProvider } from './auth/LocalStorageProvider';
 export { CustomProvider } from './auth/CustomProvider';
 export { LoginData, ReloginData } from './auth/AuthStore';
 export { EventAction } from './events/EventAction';
 export { EventTypes } from './events/EventTypes';
 
+/**
+ * Note: Some request get blocked by the Browser because they are not allowed by HmSYS (cors)
+ */
 export class NetworkConnector
 {
-    url: string
-    events: EventAction[] = []
-    socket: WebSocket | undefined = undefined;
-    auth: CustomProvider | undefined = undefined;
+    readonly url: string
+    private events: EventAction[] = []
+    private socket: WebSocket | undefined = undefined;
+    private auth: CustomProvider | undefined = undefined;
     api: Fetcher;
-    constructor(url: string) { this.url = url; this.api = new Fetcher(() => this) }
+    rest: RestFetcher;
+    constructor(url: string)
+    {
+        this.url = url;
+        this.api = new Fetcher(() => this);
+        this.rest = new RestFetcher(() => this);
+    }
 
     event = (action: EventAction) => { this.events.push(action); return this }
     ajson = (data: any) => this.socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
@@ -26,7 +36,7 @@ export class NetworkConnector
     {
         return new Promise(done =>
         {
-            this.socket = new WebSocket(this.url);
+            this.socket = new WebSocket("wss://" + this.url);
             this.auth = auth;
             this.emitEvent(EventTypes.Connecting, { socket: this.socket })
             this.socket.onmessage = (x) =>
