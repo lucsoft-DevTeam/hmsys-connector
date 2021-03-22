@@ -27,6 +27,9 @@ export class NetworkConnector
         this.rest = new RestFetcher(() => this);
     }
 
+    /**
+     * A Stupid register for every basic event. Use api.sync for better filtered data
+     */
     event = (action: EventAction) => { this.events.push(action); return this }
     ajson = (data: any) => this.socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
     json = (data: any) => this.socket?.send(JSON.stringify(data))
