@@ -24,7 +24,7 @@ export class NetworkConnector {
         this.url = url;
         this.options = options;
         this.api = new Fetcher(() => this);
-        this.rest = new RestFetcher(() => this);
+        this.rest = new RestFetcher(() => this, this.options.UNSECURE_AllowNonHTTPSConnection ?? false);
     }
 
     /**
