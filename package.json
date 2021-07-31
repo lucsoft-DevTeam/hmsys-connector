@@ -1,6 +1,6 @@
 {
     "name": "@lucsoft/network-connector",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "Network Connector the easy way to connect to your HmSYS Network",
     "main": "bin/index.js",
     "types": "bin/index.d.ts",
