@@ -1,6 +1,6 @@
-import type { NetworkConnector } from '..';
 import { EventTypes } from '../events/EventTypes';
 import { SyncAction } from "../events/SyncTypes";
+import type { NetworkConnector } from "../index";
 
 export class Fetcher {
     private hmsys: () => NetworkConnector;

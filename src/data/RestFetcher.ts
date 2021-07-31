@@ -1,4 +1,4 @@
-import type { NetworkConnector } from '..';
+import type { NetworkConnector } from "../index";
 
 export class RestFetcher {
     private hmsys: () => NetworkConnector;
