@@ -43,7 +43,14 @@ export class NetworkConnector {
         })
     }
 
-    init() {
+    restart() {
+        this.socket?.close();
+        this.socket == undefined;
+        this.ready();
+    }
+
+    ready() {
+        if (this.socket && [ 0, 1 ].includes(this.socket.readyState)) return;
         this.socket = new WebSocket((this.options.AllowNonHTTPSConnection ? "ws://" : "wss://") + this.url);
 
         this.emitEvent(EventTypes.Connecting, { socket: this.socket })
