@@ -1,11 +1,4 @@
-export type LoginData = {
-    email: string
-    password: string
-}
-
-export type ReloginData = {
+export type SignedInCredentials = {
     id: string;
     token: string;
 }
-
-export type ResponseTypeOfLoginRequest = "wrong-credentials" | "missing-credentials";

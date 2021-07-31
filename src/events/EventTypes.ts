@@ -1,10 +1,10 @@
-export enum EventTypes
-{
+export const enum EventTypes {
     Connecting,
     Conncted,
     Disconnected,
     TryingLogin,
     LoginFailed,
+    CredentialsRequired,
     LoginSuccessful,
     RawMessage,
     Message

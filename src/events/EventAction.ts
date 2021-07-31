@@ -1,3 +1,4 @@
 import { EventTypes } from './EventTypes';
 
-export type EventAction = { type: EventTypes, action: (data: any) => void };
+export type EventAction = (data: any) => void;
+export type Events = { type: EventTypes, action: (data: any) => void };
