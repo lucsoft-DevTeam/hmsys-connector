@@ -18,6 +18,7 @@ export class NetworkConnector {
     #options: NetworkConnectorOptions;
     api: Fetcher;
     rest: RestFetcher;
+    timeout = 1000;
     constructor(url: string, options: NetworkConnectorOptions = { store: saveInLocalStorageProvider() }) {
         this.url = url;
         this.#options = options;

@@ -1,4 +1,4 @@
-import { EventTypes } from '../events/EventTypes';
+import { EventTypes, RejectTypes } from '../events/EventTypes';
 import { SyncAction } from "../events/SyncTypes";
 import type { NetworkConnector } from "../index";
 
@@ -32,8 +32,12 @@ export class Fetcher {
     }
 
     customRequest(initialRequest: any) {
-        return new Promise(x => {
-            const id = (this.counter++).toString();
+        return new Promise((resolve, reject) => {
+            const id = (this.counter++).toString()
+            const timeout = setTimeout(() => {
+                reject(RejectTypes.Timeout)
+            }, this.hmsys().timeout)
+
             this.hmsys().sendWithAuth({
                 id,
                 ...initialRequest
@@ -41,7 +45,8 @@ export class Fetcher {
 
             this.eventsHolder[ id ] = (data) => {
                 if (data.id === id) {
-                    x(data)
+                    clearTimeout(timeout)
+                    resolve(data)
                     delete this.eventsHolder[ id.toString() ]
                 }
             }

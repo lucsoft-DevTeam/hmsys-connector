@@ -9,3 +9,7 @@ export const enum EventTypes {
     RawMessage,
     Message
 }
+
+export const enum RejectTypes {
+    Timeout
+}
