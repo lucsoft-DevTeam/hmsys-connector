@@ -49,7 +49,7 @@ export class NetworkConnector {
     }
 
     ready() {
-        if (this.#socket && [ 0, 1 ].includes(this.#socket.readyState)) return;
+        if (this.#socket && [ 0, 1 ].includes(this.#socket.readyState)) return true;
         this.#socket = new WebSocket((this.#options.AllowNonHTTPSConnection ? "ws://" : "wss://") + this.url);
 
         this.emitEvent(EventTypes.Connecting, { socket: this.#socket })
@@ -67,8 +67,8 @@ export class NetworkConnector {
                 } else if (data.login === false) {
                     this.emitEvent(EventTypes.LoginFailed, { socket: this.#socket })
                 } else if (data.login === true) {
-                    this.emitEvent(EventTypes.LoginSuccessful, { socket: this.#socket, data })
                     this.#options.store.setReloginDetails(data.client)
+                    this.emitEvent(EventTypes.LoginSuccessful, { socket: this.#socket, data })
                 } else {
                     this.emitEvent(EventTypes.Message, { socket: this.#socket, data })
                 }
