@@ -1,14 +1,14 @@
 import { EventTypes, RejectTypes } from '../events/EventTypes.ts';
 import { SyncAction } from "../events/SyncTypes.ts";
-import type { NetworkConnector } from "../mod.ts";
+import type { HmSYSConnector } from "../mod.ts";
 import { TriggerRequest, MessageType } from "../spec/ws.ts";
 
 export class Fetcher {
-    private hmsys: () => NetworkConnector;
+    private hmsys: () => HmSYSConnector;
     private counter = 0;
     private syncEvents: SyncAction[] = []
     private eventsHolder: { [ type in string ]: (message: TriggerRequest) => void } = {};
-    constructor(hmsys: () => NetworkConnector) {
+    constructor(hmsys: () => HmSYSConnector) {
         this.hmsys = hmsys;
         this.hmsys().rawOn(
             EventTypes.Message,

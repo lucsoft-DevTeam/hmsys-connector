@@ -11,17 +11,17 @@ export type { SignedInCredentials } from './auth/AuthStore.ts';
 export * from './events/EventAction.ts';
 export * from './spec/ws.ts';
 export * from './events/EventTypes.ts';
-export type NetworkConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider };
+export type HmSYSConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider };
 
-export class NetworkConnector {
+export class HmSYSConnector {
     readonly url: string
     #events: Events[] = []
     #socket: WebSocket | undefined = undefined;
-    #options: NetworkConnectorOptions;
+    #options: HmSYSConnectorOptions;
     api: Fetcher;
     rest: RestFetcher;
     timeout = 1000;
-    constructor(url: string, options: NetworkConnectorOptions = { store: saveInLocalStorageProvider() }) {
+    constructor(url: string, options: HmSYSConnectorOptions = { store: saveInLocalStorageProvider() }) {
         this.url = url;
         this.#options = options;
         this.api = new Fetcher(() => this);

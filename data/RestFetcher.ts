@@ -1,9 +1,9 @@
-import type { NetworkConnector } from "../mod.ts";
+import type { HmSYSConnector } from "../mod.ts";
 
 export class RestFetcher {
-    private hmsys: () => NetworkConnector;
+    private hmsys: () => HmSYSConnector;
     http: boolean;
-    constructor(hmsys: () => NetworkConnector, http: boolean) {
+    constructor(hmsys: () => HmSYSConnector, http: boolean) {
         this.http = http;
         this.hmsys = hmsys;
     }
