@@ -1,16 +1,16 @@
-import { EventAction, Events } from './events/EventAction';
-import { EventTypes } from './events/EventTypes';
-import { CredentialsProvider } from './auth/CredentialsProvider';
-import { Fetcher } from './data/Fetcher';
-import { RestFetcher } from './data/RestFetcher';
-import { saveInLocalStorageProvider } from "./auth/SaveInLocalStorage";
-import { Message, MessageType } from "./spec/ws";
-export { saveInLocalStorageProvider as createLocalStorageProvider } from './auth/SaveInLocalStorage';
-export { CredentialsProvider as CustomProvider } from './auth/CredentialsProvider';
-export { SignedInCredentials } from './auth/AuthStore';
-export * from './events/EventAction';
-export * from './spec/ws';
-export * from './events/EventTypes';
+import { EventAction, Events } from './events/EventAction.ts';
+import { EventTypes } from './events/EventTypes.ts';
+import { CredentialsProvider } from './auth/CredentialsProvider.ts';
+import { Fetcher } from './data/Fetcher.ts';
+import { RestFetcher } from './data/RestFetcher.ts';
+import { saveInLocalStorageProvider } from "./auth/SaveInLocalStorage.ts";
+import { Message, MessageType } from "./spec/ws.ts";
+export { saveInLocalStorageProvider as createLocalStorageProvider } from './auth/SaveInLocalStorage.ts';
+export type { CredentialsProvider as CustomProvider } from './auth/CredentialsProvider.ts';
+export type { SignedInCredentials } from './auth/AuthStore.ts';
+export * from './events/EventAction.ts';
+export * from './spec/ws.ts';
+export * from './events/EventTypes.ts';
 export type NetworkConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider };
 
 export class NetworkConnector {
@@ -87,7 +87,7 @@ export class NetworkConnector {
 
     getAuth = () => this.#options.store?.getReloginDetails();
 
-    private emitEvent(type: EventTypes, data: any) {
+    private emitEvent(type: EventTypes, data: unknown) {
         this.#events.filter(x => x.type == type).forEach(x => x.action(data))
         return this;
     }

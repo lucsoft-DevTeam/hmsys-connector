@@ -1,4 +1,4 @@
-import type { SignedInCredentials } from './AuthStore';
+import type { SignedInCredentials } from './AuthStore.ts';
 
 export type CredentialsProvider = {
     getReloginDetails: () => SignedInCredentials | undefined

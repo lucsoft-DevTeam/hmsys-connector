@@ -1,4 +1,4 @@
-import type { NetworkConnector } from "../index";
+import type { NetworkConnector } from "../mod.ts";
 
 export class RestFetcher {
     private hmsys: () => NetworkConnector;
@@ -12,7 +12,7 @@ export class RestFetcher {
         const auth = this.hmsys().getAuth();
         return fetch(`http${this.http ? '' : 's'}://${this.hmsys().url}/api/${id}/${path}`, {
             headers: new Headers({
-                'Authorization': 'Basic ' + btoa(`${auth!.id}:${auth!.token}`),
+                'Authorization': `Basic ${btoa(`${auth!.id}:${auth!.token}`)}`,
             })
         })
     }
