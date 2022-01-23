@@ -4,10 +4,12 @@ import { CredentialsProvider } from './auth/CredentialsProvider';
 import { Fetcher } from './data/Fetcher';
 import { RestFetcher } from './data/RestFetcher';
 import { saveInLocalStorageProvider } from "./auth/SaveInLocalStorage";
+import { Message, MessageType } from "./spec/ws";
 export { saveInLocalStorageProvider as createLocalStorageProvider } from './auth/SaveInLocalStorage';
 export { CredentialsProvider as CustomProvider } from './auth/CredentialsProvider';
 export { SignedInCredentials } from './auth/AuthStore';
 export * from './events/EventAction';
+export * from './spec/ws';
 export * from './events/EventTypes';
 export type NetworkConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider };
 
@@ -27,8 +29,8 @@ export class NetworkConnector {
     }
 
     rawOn = (type: EventTypes, action: EventAction) => { this.#events.push({ action, type }); return this }
-    sendWithAuth = (data: Object) => this.#socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
-    send = (data: string | ArrayBufferLike | Blob | ArrayBufferView | Object) => {
+    sendWithAuth = (data: Message) => this.#socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
+    send = (data: Message) => {
         if (typeof data == "object") {
             this.#socket?.send(JSON.stringify(data))
         } else this.#socket?.send(data)
@@ -36,7 +38,7 @@ export class NetworkConnector {
 
     authorize(email: string, password: string) {
         this.send({
-            action: "login",
+            action: MessageType.Login,
             type: "client",
             email,
             password
@@ -62,7 +64,7 @@ export class NetworkConnector {
                     this.emitEvent(EventTypes.TryingLogin, { socket: this.#socket })
                     const relogin = this.#options.store.getReloginDetails();
                     if (relogin)
-                        this.send({ action: "login", type: "client", token: relogin.token, id: relogin.id })
+                        this.send({ action: MessageType.Login, type: "client", token: relogin.token, id: relogin.id })
                     else
                         this.emitEvent(EventTypes.CredentialsRequired, { socket: this.#socket })
                 } else if (data.login === false) {

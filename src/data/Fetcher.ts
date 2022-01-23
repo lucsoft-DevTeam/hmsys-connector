@@ -1,6 +1,7 @@
 import { EventTypes, RejectTypes } from '../events/EventTypes';
 import { SyncAction } from "../events/SyncTypes";
 import type { NetworkConnector } from "../index";
+import { MessageType } from "../spec/ws";
 
 export class Fetcher {
     private hmsys: () => NetworkConnector;
@@ -56,7 +57,7 @@ export class Fetcher {
     trigger(id: string, data: any) {
         this.hmsys().sendWithAuth({
             id,
-            action: "trigger",
+            action: MessageType.Trigger,
             type: id,
             data
         })
@@ -64,7 +65,7 @@ export class Fetcher {
 
     triggerWithResponse(id: string, data: any) {
         return this.customRequest({
-            action: "trigger",
+            action: MessageType.Trigger,
             type: id,
             data
         })
