@@ -4,7 +4,7 @@ import { CredentialsProvider } from './auth/CredentialsProvider.ts';
 import { Fetcher } from './data/Fetcher.ts';
 import { RestFetcher } from './data/RestFetcher.ts';
 import { saveInLocalStorageProvider } from "./auth/SaveInLocalStorage.ts";
-import { Message, MessageType } from "./spec/ws.ts";
+import { HmRequest, HmResponse, MessageType } from "./spec/ws.ts";
 export { saveInLocalStorageProvider as createLocalStorageProvider } from './auth/SaveInLocalStorage.ts';
 export type { CredentialsProvider as CustomProvider } from './auth/CredentialsProvider.ts';
 export type { SignedInCredentials } from './auth/AuthStore.ts';
@@ -29,8 +29,8 @@ export class HmSYSConnector {
     }
 
     rawOn = (type: EventTypes, action: EventAction) => { this.#events.push({ action, type }); return this }
-    sendWithAuth = (data: Message) => this.#socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
-    send = (data: Message) => {
+    sendWithAuth = (data: HmRequest) => this.#socket?.send(JSON.stringify({ ...data, auth: this.getAuth() }))
+    send = (data: HmRequest) => {
         if (typeof data == "object") {
             this.#socket?.send(JSON.stringify(data))
         } else this.#socket?.send(data)
@@ -87,7 +87,7 @@ export class HmSYSConnector {
 
     getAuth = () => this.#options.store?.getReloginDetails();
 
-    private emitEvent(type: EventTypes, data: unknown) {
+    private emitEvent(type: EventTypes, data: { socket?: WebSocket, data?: HmResponse }) {
         this.#events.filter(x => x.type == type).forEach(x => x.action(data))
         return this;
     }
