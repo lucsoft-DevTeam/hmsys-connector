@@ -3,33 +3,40 @@ export type HmRequest =
     | QueryRequest
     | LoginRequest
     | AccountRequest
-    | TriggerRequest;
+    | TriggerRequest
+    | SubscribeRequest;
 
 export type HmResponse =
     | SyncResponse
     | ProfileResponse
     | LoginResponse
-    | QueryResponse;
+    | QueryResponse
+    | PublishResponse;
 
+export type PublishResponse = {
+    type: "pub";
+    id: string;
+    data: Record<string, string>;
+};
 export type QueryResponse = {
-    type: "query",
-    response: string
+    type: "query";
+    response: string;
 } & Record<string, unknown>;
 export type LoginResponse = {
-    login: true,
-    id: undefined,
-    type: "client",
-    client: {
-        email?: string,
-        id: string,
-        token: string
-    }
-} | {
-    id: undefined,
+    login: true;
+    id: undefined;
     type: "client";
-    login: false,
-    error: "forcedClosed"
-}
+    client: {
+        email?: string;
+        id: string;
+        token: string;
+    };
+} | {
+    id: undefined;
+    type: "client";
+    login: false;
+    error: "forcedClosed";
+};
 export type ProfileResponse = {
     type: "profile";
     id?: string;
@@ -37,7 +44,7 @@ export type ProfileResponse = {
 export type SyncResponse = {
     type: "sync";
     id?: string;
-    data: Record<string, string>
+    data: Record<string, string>;
 };
 export type QueryRequest = {
     action: MessageType.Query;
@@ -53,8 +60,8 @@ export const enum MessageType {
     Account = "account",
     Trigger = "trigger",
     Query = "query",
+    Subscribe = "sub",
 }
-
 export type LoginRequest =
     & {
         action: MessageType.Login;
@@ -88,4 +95,10 @@ export type TriggerRequest = {
     targetId?: string;
     id?: string;
     data?: unknown;
+};
+
+export type SubscribeRequest = {
+    action: MessageType.Subscribe;
+    auth?: Authentication;
+    id: string;
 };
