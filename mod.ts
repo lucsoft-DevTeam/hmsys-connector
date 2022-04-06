@@ -38,11 +38,9 @@ export class HmSYSConnector {
             })
         if (options.allowReconnect)
             this.rawOn(EventTypes.Disconnected, () => {
-                setTimeout(() => {
-                    this.restart();
-                    this.rawOn(EventTypes.LoginSuccessful, () => {
-                        this.emitEvent(EventTypes.Reconnect, {});
-                    })
+                setTimeout(async () => {
+                    await this.restart();
+                    this.emitEvent(EventTypes.Reconnect, {});
                 }, 100)
             })
     }
@@ -82,44 +80,48 @@ export class HmSYSConnector {
                 ?? this.#publisher.set(id, [ data ]);
         }
     }
-    restart() {
+    async restart() {
         this.#socket?.close();
         this.#socket == undefined;
-        this.ready();
+        await this.ready();
     }
 
     ready() {
-        if (this.#socket && [ 0, 1 ].includes(this.#socket.readyState)) return true;
-        this.#socket = new WebSocket((this.#options.AllowNonHTTPSConnection ? "ws://" : "wss://") + this.url);
+        return new Promise<void>((done, err) => {
+            if (this.#socket && [ 0, 1 ].includes(this.#socket.readyState)) return true;
+            this.#socket = new WebSocket((this.#options.AllowNonHTTPSConnection ? "ws://" : "wss://") + this.url);
 
-        this.emitEvent(EventTypes.Connecting, { socket: this.#socket })
-        this.#socket.onmessage = (x) => {
-            try {
-                const data = JSON.parse(x.data)
-                this.emitEvent(EventTypes.RawMessage, { data, socket: this.#socket })
-                if (data.login === "require authentication") {
-                    this.emitEvent(EventTypes.TryingLogin, { socket: this.#socket })
-                    const relogin = this.#options.store.getReloginDetails();
-                    if (relogin)
-                        this.send({ action: MessageType.Login, type: "client", token: relogin.token, id: relogin.id })
-                    else
-                        this.emitEvent(EventTypes.CredentialsRequired, { socket: this.#socket })
-                } else if (data.login === false) {
-                    this.emitEvent(EventTypes.LoginFailed, { socket: this.#socket })
-                } else if (data.login === true) {
-                    this.#options.store.setReloginDetails(data.client)
-                    this.emitEvent(EventTypes.LoginSuccessful, { socket: this.#socket, data })
-                } else {
-                    this.emitEvent(EventTypes.Message, { socket: this.#socket, data })
+            this.emitEvent(EventTypes.Connecting, { socket: this.#socket })
+            this.#socket.onmessage = (x) => {
+                try {
+                    const data = JSON.parse(x.data)
+                    this.emitEvent(EventTypes.RawMessage, { data, socket: this.#socket })
+                    if (data.login === "require authentication") {
+                        this.emitEvent(EventTypes.TryingLogin, { socket: this.#socket })
+                        const relogin = this.#options.store.getReloginDetails();
+                        if (relogin)
+                            this.send({ action: MessageType.Login, type: "client", token: relogin.token, id: relogin.id })
+                        else
+                            this.emitEvent(EventTypes.CredentialsRequired, { socket: this.#socket })
+                    } else if (data.login === false) {
+                        err();
+                        this.emitEvent(EventTypes.LoginFailed, { socket: this.#socket })
+                    } else if (data.login === true) {
+                        done();
+                        this.#options.store.setReloginDetails(data.client)
+                        this.emitEvent(EventTypes.LoginSuccessful, { socket: this.#socket, data })
+                    } else {
+                        this.emitEvent(EventTypes.Message, { socket: this.#socket, data })
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        this.#socket.onopen = () => this.emitEvent(EventTypes.Conncted, { socket: this.#socket })
-        this.#socket.onclose = () => this.emitEvent(EventTypes.Disconnected, { socket: this.#socket })
-        this.#socket.onerror = () => this.emitEvent(EventTypes.Disconnected, { socket: this.#socket })
+            };
+            this.#socket.onopen = () => this.emitEvent(EventTypes.Conncted, { socket: this.#socket })
+            this.#socket.onclose = () => this.emitEvent(EventTypes.Disconnected, { socket: this.#socket })
+            this.#socket.onerror = () => this.emitEvent(EventTypes.Disconnected, { socket: this.#socket })
 
+        })
     }
 
     getAuth = () => this.#options.store?.getReloginDetails();
