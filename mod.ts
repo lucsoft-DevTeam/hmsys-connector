@@ -4,18 +4,20 @@ import { CredentialsProvider } from './auth/CredentialsProvider.ts';
 import { Fetcher } from './data/Fetcher.ts';
 import { RestFetcher } from './data/RestFetcher.ts';
 import { saveInLocalStorageProvider } from "./auth/SaveInLocalStorage.ts";
-import { HmRequest, HmResponse, MessageType } from "./spec/ws.ts";
+import { HmRequest, HmResponse, MessageType, PublishResponse, SubscribeRequest } from "./spec/ws.ts";
 export { saveInLocalStorageProvider as createLocalStorageProvider } from './auth/SaveInLocalStorage.ts';
 export type { CredentialsProvider as CustomProvider } from './auth/CredentialsProvider.ts';
 export type { SignedInCredentials } from './auth/AuthStore.ts';
 export * from './events/EventAction.ts';
 export * from './spec/ws.ts';
 export * from './events/EventTypes.ts';
-export type HmSYSConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider };
+export type HmSYSConnectorOptions = { AllowNonHTTPSConnection?: boolean, store: CredentialsProvider, preventResubscibeOnReconnect?: boolean, allowReconnect?: boolean };
 
 export class HmSYSConnector {
     readonly url: string
     #events: Events[] = []
+    #subs = new Set<string>();
+    #publisher = new Map<string, ((data: PublishResponse) => void)[]>();
     #socket: WebSocket | undefined = undefined;
     #options: HmSYSConnectorOptions;
     api: Fetcher;
@@ -26,6 +28,23 @@ export class HmSYSConnector {
         this.#options = options;
         this.api = new Fetcher(() => this);
         this.rest = new RestFetcher(() => this, this.#options.AllowNonHTTPSConnection ?? false);
+        if (!options.preventResubscibeOnReconnect)
+            this.rawOn(EventTypes.Reconnect, () => {
+                this.#subs.forEach(id => this.send(<SubscribeRequest>{
+                    id,
+                    auth: this.getAuth(),
+                    action: "sub"
+                }))
+            })
+        if (options.allowReconnect)
+            this.rawOn(EventTypes.Disconnected, () => {
+                setTimeout(() => {
+                    this.restart();
+                    this.rawOn(EventTypes.LoginSuccessful, () => {
+                        this.emitEvent(EventTypes.Reconnect, {});
+                    })
+                }, 100)
+            })
     }
 
     rawOn = (type: EventTypes, action: EventAction) => { this.#events.push({ action, type }); return this }
@@ -45,6 +64,24 @@ export class HmSYSConnector {
         })
     }
 
+
+    pubsub = {
+        unsubscribe: (id: string) => {
+            this.#publisher.delete(id);
+            this.#subs.delete(id);
+        },
+        subscribe: (id: string, data: (data: PublishResponse) => void) => {
+            if (!this.#subs.has(id))
+                this.send(<SubscribeRequest>{
+                    id,
+                    auth: this.getAuth(),
+                    action: "sub"
+                })
+
+            this.#publisher.get(id)?.push(data)
+                ?? this.#publisher.set(id, [ data ]);
+        }
+    }
     restart() {
         this.#socket?.close();
         this.#socket == undefined;

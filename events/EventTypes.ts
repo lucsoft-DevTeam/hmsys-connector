@@ -5,6 +5,7 @@ export const enum EventTypes {
     TryingLogin,
     LoginFailed,
     CredentialsRequired,
+    Reconnect,
     LoginSuccessful,
     RawMessage,
     Message
