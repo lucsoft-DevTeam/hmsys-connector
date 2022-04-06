@@ -36,12 +36,16 @@ export class HmSYSConnector {
                     action: "sub"
                 }))
             })
+        let counter = 10;
         if (options.allowReconnect)
             this.rawOn(EventTypes.Disconnected, () => {
-                setTimeout(async () => {
-                    await this.restart();
-                    this.emitEvent(EventTypes.Reconnect, {});
-                }, 100)
+                counter--;
+                if (counter)
+                    setTimeout(async () => {
+                        await this.restart();
+                        this.emitEvent(EventTypes.Reconnect, {});
+                        counter = 10;
+                    }, 300)
             })
     }
 
