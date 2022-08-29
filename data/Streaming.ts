@@ -9,14 +9,22 @@ export type StreamingUploadEvents = {
 /**
  * a streaming file uploader with backpressure.
  *
- * phases:
+ * ### Phases:
+ *
  * 1: Auth          => (When the WebSocket Opens)
+ *
  * 2: File          <= (Backend sends a "file" request)
+ *
  * 3: File Metadata => (Uploader sends a 'file { filename: "", type: ""}' request)
+ *
  * 4: Next          <= (Backend Waits for binary data)
+ *
  * 5: *binary*      => (Sends a Chunk of the File to the backend)
- * [...]               (Drains the Buffer to the end)
+ *
+ * [...]               (Step 4 and 5 gets repeated until the File is send)
+ *
  * 6: End           => (Uploader sends "end" Request)
+ *
  * 7: *response*    => (Backend sends a finial Response: Should often be a json with an id in it)
  *
  * Note: In the Future most of the stuff could be reduced to WebSocketStream as it also allows backpressure.
