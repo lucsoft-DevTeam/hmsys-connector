@@ -1,4 +1,4 @@
-export type Authentication = Partial<{ id: string; token: string }>;
+export type Authentication = Partial<{ id: string; token: string; }>;
 export type HmRequest =
     | QueryRequest
     | LoginRequest
@@ -60,7 +60,7 @@ export const enum MessageType {
     Account = "account",
     Trigger = "trigger",
     Query = "query",
-    Subscribe = "sub",
+    Subscribe = "sub"
 }
 export type LoginRequest =
     & {
